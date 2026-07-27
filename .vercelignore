@@ -1,0 +1,8 @@
+app/
+notebooks/
+catboost_info/
+tests/
+data/raw/
+.git/
+*.ipynb
+*.log
