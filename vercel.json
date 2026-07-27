@@ -2,12 +2,13 @@
   "version": 2,
   "functions": {
     "api/index.py": {
-      "includeFiles": "models/trained_model.pkl",
+      "includeFiles": "models/**",
       "excludeFiles": "data/**|notebooks/**|reports/figures/**|reports/system.log|tests/**|catboost_info/**|.git/**"
     }
   },
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index.py" },
+    { "source": "/", "destination": "/static/index.html" },
     { "source": "/(.*)", "destination": "/static/$1" }
   ]
 }
