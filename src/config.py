@@ -26,9 +26,12 @@ FEATURE_IMPORTANCE_PATH = METRICS_DIR / "feature_importance.csv"
 EVALUATION_REPORT_PDF_PATH = EXPORTS_DIR / "evaluation_report.pdf"
 PREDICTION_HISTORY_CSV_PATH = EXPORTS_DIR / "prediction_history.csv"
 
-# Ensure directories exist
+# Ensure directories exist (safe for read-only serverless filesystems like Vercel)
 for path_dir in [PROCESSED_DATA_DIR, MODELS_DIR, FIGURES_DIR, METRICS_DIR, EXPORTS_DIR]:
-    path_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        path_dir.mkdir(parents=True, exist_ok=True)
+    except (OSError, PermissionError):
+        pass
 
 # --- Feature Column Definitions ---
 TARGET_COL = "price"

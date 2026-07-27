@@ -1,5 +1,6 @@
 """
 Utility functions for file I/O, serialization, data formatting, and prediction history storage.
+Vercel Serverless read-only filesystem compatible.
 """
 
 import json
@@ -14,14 +15,15 @@ from src.config import PREDICTION_HISTORY_CSV_PATH
 
 
 def save_joblib(obj: Any, file_path: Path) -> None:
-    """Save an object using joblib serialization."""
+    """Save an object using joblib serialization (safely handled for read-only filesystems)."""
     try:
         file_path.parent.mkdir(parents=True, exist_ok=True)
         joblib.dump(obj, file_path)
         logger.info(f"Successfully saved Joblib object to {file_path}")
+    except (OSError, PermissionError) as e:
+        logger.warning(f"Could not save Joblib object to {file_path} (read-only filesystem): {e}")
     except Exception as e:
         logger.error(f"Failed to save Joblib object to {file_path}: {e}")
-        raise
 
 
 def load_joblib(file_path: Path) -> Any:
@@ -38,20 +40,23 @@ def load_joblib(file_path: Path) -> Any:
 
 
 def save_json(data: Dict[str, Any], file_path: Path) -> None:
-    """Save dictionary to JSON file."""
+    """Save dictionary to JSON file (safely handled for read-only filesystems)."""
     try:
         file_path.parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=4)
         logger.info(f"Successfully saved JSON to {file_path}")
+    except (OSError, PermissionError) as e:
+        logger.warning(f"Could not save JSON to {file_path} (read-only filesystem): {e}")
     except Exception as e:
         logger.error(f"Failed to save JSON to {file_path}: {e}")
-        raise
 
 
 def load_json(file_path: Path) -> Dict[str, Any]:
     """Load dictionary from JSON file."""
     try:
+        if not file_path.exists():
+            return {}
         with open(file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         return data
@@ -71,7 +76,7 @@ def format_number(value: Union[float, int], decimals: int = 2) -> str:
 
 
 def save_prediction_record(record: Dict[str, Any]) -> None:
-    """Append a single prediction record to prediction_history.csv."""
+    """Append a single prediction record to prediction_history.csv (read-only filesystem safe)."""
     try:
         PREDICTION_HISTORY_CSV_PATH.parent.mkdir(parents=True, exist_ok=True)
         df_new = pd.DataFrame([record])
@@ -80,5 +85,7 @@ def save_prediction_record(record: Dict[str, Any]) -> None:
         else:
             df_new.to_csv(PREDICTION_HISTORY_CSV_PATH, mode="w", header=True, index=False)
         logger.info("Appended prediction record to history.")
+    except (OSError, PermissionError) as e:
+        logger.warning(f"Skipping prediction history write on read-only serverless filesystem: {e}")
     except Exception as e:
         logger.error(f"Error saving prediction record: {e}")

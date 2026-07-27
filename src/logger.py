@@ -1,5 +1,5 @@
 """
-Logging configuration for the House Price Prediction application.
+Logging configuration for the House Price Prediction application (Vercel Serverless Ready).
 """
 
 import logging
@@ -9,9 +9,11 @@ from src.config import REPORTS_DIR
 
 LOG_FILE_PATH = REPORTS_DIR / "system.log"
 
+
 def get_logger(name: str = "HousePriceApp") -> logging.Logger:
     """
-    Get a configured logger instance that writes formatted log messages to stdout and system.log.
+    Get a configured logger instance that writes formatted log messages to stdout
+    and optionally to system.log if filesystem is writable.
     
     Args:
         name (str): Name of the logger domain/module.
@@ -23,21 +25,23 @@ def get_logger(name: str = "HousePriceApp") -> logging.Logger:
     logger.setLevel(logging.INFO)
 
     if not logger.handlers:
-        # Formatter
         formatter = logging.Formatter(
             fmt="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
             datefmt="%Y-%m-%d %H:%M:%S"
         )
 
-        # Stream Handler (stdout)
+        # Stream Handler (stdout - works everywhere including Vercel Serverless)
         stream_handler = logging.StreamHandler(sys.stdout)
         stream_handler.setFormatter(formatter)
         logger.addHandler(stream_handler)
 
-        # File Handler
-        file_handler = logging.FileHandler(LOG_FILE_PATH, encoding="utf-8")
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
+        # File Handler (safely handled for read-only serverless filesystems)
+        try:
+            file_handler = logging.FileHandler(LOG_FILE_PATH, encoding="utf-8")
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
+        except (OSError, PermissionError):
+            pass
 
     return logger
 
