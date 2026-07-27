@@ -6,7 +6,8 @@
       "excludeFiles": "data/**|notebooks/**|reports/figures/**|reports/system.log|tests/**|catboost_info/**|.git/**"
     }
   },
-  "routes": [
-    { "src": "/(.*)", "dest": "api/index.py" }
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api/index.py" },
+    { "source": "/(.*)", "destination": "/api/index.py" }
   ]
 }
