@@ -1,11 +1,12 @@
 """
 Vercel Serverless Gateway powered by FastAPI.
-Routes incoming HTTP requests on Vercel to the Python ML engine.
+Routes incoming HTTP requests on Vercel to the Python ML engine and serves the Web Dashboard.
 """
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import sys
 from pathlib import Path
@@ -35,6 +36,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Mount static files if directory exists
+static_dir = root_dir / "static"
+if static_dir.exists():
+    css_dir = static_dir / "css"
+    js_dir = static_dir / "js"
+    if css_dir.exists():
+        app.mount("/css", StaticFiles(directory=str(css_dir)), name="css")
+    if js_dir.exists():
+        app.mount("/js", StaticFiles(directory=str(js_dir)), name="js")
+
 
 class PredictionInput(BaseModel):
     bedrooms: int = 3
@@ -55,6 +66,14 @@ class PredictionInput(BaseModel):
     long: float = -122.213
     sqft_living15: int = 1900
     sqft_lot15: int = 7500
+
+
+@app.get("/")
+def serve_home():
+    index_file = static_dir / "index.html"
+    if index_file.exists():
+        return FileResponse(str(index_file))
+    return {"status": "online", "message": "RealEstate.AI Vercel Application"}
 
 
 @app.get("/api/health")

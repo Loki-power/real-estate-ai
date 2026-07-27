@@ -2,13 +2,11 @@
   "version": 2,
   "functions": {
     "api/index.py": {
-      "includeFiles": "models/**",
+      "includeFiles": "models/**|static/**",
       "excludeFiles": "data/**|notebooks/**|reports/figures/**|reports/system.log|tests/**|catboost_info/**|.git/**"
     }
   },
-  "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.py" },
-    { "source": "/", "destination": "/static/index.html" },
-    { "source": "/(.*)", "destination": "/static/$1" }
+  "routes": [
+    { "src": "/(.*)", "dest": "api/index.py" }
   ]
 }
