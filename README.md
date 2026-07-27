@@ -1,9 +1,10 @@
 # 🏠 RealEstate.AI - Production-Ready House Price Prediction Platform
 
-[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.12-blue.svg)](https://www.python.org/)
 [![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-1.3%2B-orange.svg)](https://scikit-learn.org/)
 [![Vercel](https://img.shields.io/badge/Deployment-Vercel%20Serverless-000000.svg)](https://vercel.com/)
 [![Streamlit](https://img.shields.io/badge/Dashboard-Streamlit-FF4B4B.svg)](https://streamlit.io/)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FLoki-power%2Freal-estate-ai)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 An enterprise-grade, scalable, and modular **House Price Valuation Platform** built using Python, Scikit-learn, XGBoost, LightGBM, CatBoost, SHAP Explainable AI, ReportLab PDF Generation, and dual web interfaces (**Streamlit Multi-Page Dashboard** & **Vercel Serverless Gateway**).
