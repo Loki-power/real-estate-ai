@@ -1,19 +1,24 @@
 """
-Explainable AI (XAI) engine using SHAP for global/local feature importance and natural language explanations.
+Explainable AI (XAI) engine using SHAP with graceful fallback to tree/linear feature importances.
 """
 
 import pandas as pd
 import numpy as np
-import shap
 from typing import Dict, Any, List, Tuple, Optional
+
+try:
+    import shap
+    HAS_SHAP = True
+except ImportError:
+    shap = None
+    HAS_SHAP = False
 
 from src.logger import logger
 from src.config import FEATURE_IMPORTANCE_PATH
-from src.utils import save_joblib
 
 
 class Explainer:
-    """Computes SHAP explanations and natural language narrative descriptions."""
+    """Computes feature importances and natural language narrative descriptions."""
 
     def __init__(self, pipeline: Any):
         self.pipeline = pipeline
@@ -34,16 +39,17 @@ class Explainer:
         else:
             feature_names = [f"feature_{i}" for i in range(X_trans.shape[1])]
 
-        # Clean feature names (remove num__ and cat__)
         clean_names = [name.replace("num__", "").replace("cat__", "") for name in feature_names]
         return X_trans, clean_names
 
     def fit_shap(self, X_train_sample: pd.DataFrame) -> None:
-        """Fits SHAP explainer on a background training sample."""
+        """Fits SHAP explainer if available."""
+        if not HAS_SHAP:
+            logger.info("SHAP package not present. Falling back to native tree/model feature importances.")
+            return
+
         try:
             X_trans, _ = self._get_transformed_features(X_train_sample)
-            
-            # Tree-based or linear explainer
             if hasattr(self.model, "feature_importances_") or "Tree" in type(self.model).__name__ or "Forest" in type(self.model).__name__ or "Boost" in type(self.model).__name__:
                 self.explainer = shap.TreeExplainer(self.model)
             else:
@@ -51,33 +57,33 @@ class Explainer:
 
             logger.info("Fitted SHAP explainer successfully.")
         except Exception as e:
-            logger.warning(f"Defaulting to generic Kernel/Permutation SHAP explainer due to: {e}")
-            X_trans, _ = self._get_transformed_features(X_train_sample)
-            self.explainer = shap.Explainer(self.model.predict, X_trans)
-
-    def get_shap_values(self, X_sample: pd.DataFrame) -> Tuple[np.ndarray, List[str]]:
-        """Calculates SHAP values matrix and returns clean feature names."""
-        if self.explainer is None:
-            self.fit_shap(X_sample)
-
-        X_trans, clean_names = self._get_transformed_features(X_sample)
-        shap_vals = self.explainer(X_trans)
-
-        if hasattr(shap_vals, "values"):
-            shap_matrix = shap_vals.values
-        else:
-            shap_matrix = np.array(shap_vals)
-
-        return shap_matrix, clean_names
+            logger.warning(f"SHAP fit fallback: {e}")
 
     def export_feature_importance(self, X_sample: pd.DataFrame) -> pd.DataFrame:
-        """Calculates global mean absolute SHAP values and exports feature_importance.csv."""
-        shap_matrix, clean_names = self.get_shap_values(X_sample)
-        mean_abs_shap = np.abs(shap_matrix).mean(axis=0)
+        """Calculates global feature importances and exports feature_importance.csv."""
+        X_trans, clean_names = self._get_transformed_features(X_sample)
+
+        importances = np.zeros(len(clean_names))
+
+        if HAS_SHAP and self.explainer is not None:
+            try:
+                shap_vals = self.explainer(X_trans)
+                shap_matrix = shap_vals.values if hasattr(shap_vals, "values") else np.array(shap_vals)
+                importances = np.abs(shap_matrix).mean(axis=0)
+            except Exception:
+                pass
+
+        if np.all(importances == 0):
+            if hasattr(self.model, "feature_importances_"):
+                importances = self.model.feature_importances_
+            elif hasattr(self.model, "coef_"):
+                importances = np.abs(self.model.coef_)
+            else:
+                importances = np.ones(len(clean_names)) / len(clean_names)
 
         df_imp = pd.DataFrame({
             "feature": clean_names,
-            "importance": mean_abs_shap
+            "importance": importances
         }).sort_values(by="importance", ascending=False).reset_index(drop=True)
 
         df_imp.to_csv(FEATURE_IMPORTANCE_PATH, index=False)
@@ -86,18 +92,10 @@ class Explainer:
 
     def generate_natural_language_explanation(self, instance_dict: Dict[str, Any], predicted_price: float) -> str:
         """
-        AI Feature: Converts house attributes and SHAP impact into natural language explanation.
-        
-        Args:
-            instance_dict (Dict[str, Any]): Feature values of house.
-            predicted_price (float): Predicted house valuation.
-            
-        Returns:
-            str: Human-readable natural language paragraph explaining the price.
+        AI Feature: Converts house attributes into a natural language narrative explanation.
         """
         reasons = []
 
-        # Key drivers inspection
         sqft = instance_dict.get("sqft_living", 2000)
         grade = instance_dict.get("grade", 7)
         waterfront = instance_dict.get("waterfront", 0)
@@ -106,7 +104,7 @@ class Explainer:
         yr_built = instance_dict.get("yr_built", 1980)
 
         if sqft > 2800:
-            reasons.append(f"large living space ({sqft:,} sq ft)")
+            reasons.append(f"large living area ({sqft:,} sq ft)")
         elif sqft < 1400:
             reasons.append(f"compact interior area ({sqft:,} sq ft)")
 
