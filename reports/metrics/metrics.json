@@ -1,0 +1,101 @@
+{
+    "Linear Regression": {
+        "MAE": 103973.7,
+        "MSE": 21253436973.11,
+        "RMSE": 145785.59,
+        "R2_Score": 0.7669,
+        "Adj_R2": 0.7655,
+        "MAPE": 21.37,
+        "Model": "Linear Regression"
+    },
+    "Ridge Regression": {
+        "MAE": 104057.18,
+        "MSE": 21328456864.72,
+        "RMSE": 146042.65,
+        "R2_Score": 0.7661,
+        "Adj_R2": 0.7647,
+        "MAPE": 21.39,
+        "Model": "Ridge Regression"
+    },
+    "Lasso Regression": {
+        "MAE": 104127.37,
+        "MSE": 21382942497.13,
+        "RMSE": 146229.08,
+        "R2_Score": 0.7655,
+        "Adj_R2": 0.7641,
+        "MAPE": 21.4,
+        "Model": "Lasso Regression"
+    },
+    "Decision Tree": {
+        "MAE": 84843.49,
+        "MSE": 18252836352.4,
+        "RMSE": 135103.06,
+        "R2_Score": 0.7998,
+        "Adj_R2": 0.7986,
+        "MAPE": 16.79,
+        "Model": "Decision Tree"
+    },
+    "Random Forest": {
+        "MAE": 64123.38,
+        "MSE": 9946488750.57,
+        "RMSE": 99732.08,
+        "R2_Score": 0.8909,
+        "Adj_R2": 0.8903,
+        "MAPE": 12.88,
+        "Model": "Random Forest"
+    },
+    "Extra Trees": {
+        "MAE": 63936.33,
+        "MSE": 10001601770.08,
+        "RMSE": 100008.01,
+        "R2_Score": 0.8903,
+        "Adj_R2": 0.8897,
+        "MAPE": 12.81,
+        "Model": "Extra Trees"
+    },
+    "Gradient Boosting": {
+        "MAE": 63599.72,
+        "MSE": 9156005203.38,
+        "RMSE": 95687.02,
+        "R2_Score": 0.8996,
+        "Adj_R2": 0.899,
+        "MAPE": 12.89,
+        "Model": "Gradient Boosting"
+    },
+    "AdaBoost": {
+        "MAE": 121054.1,
+        "MSE": 27494964661.97,
+        "RMSE": 165816.06,
+        "R2_Score": 0.6984,
+        "Adj_R2": 0.6967,
+        "MAPE": 25.67,
+        "Model": "AdaBoost"
+    },
+    "XGBoost": {
+        "MAE": 61230.36,
+        "MSE": 8502696234.74,
+        "RMSE": 92210.07,
+        "R2_Score": 0.9067,
+        "Adj_R2": 0.9062,
+        "MAPE": 12.42,
+        "Model": "XGBoost"
+    },
+    "LightGBM": {
+        "MAE": 64912.51,
+        "MSE": 9488292550.82,
+        "RMSE": 97407.87,
+        "R2_Score": 0.8959,
+        "Adj_R2": 0.8953,
+        "MAPE": 13.35,
+        "Model": "LightGBM"
+    },
+    "CatBoost": {
+        "MAE": 62622.01,
+        "MSE": 8763304541.24,
+        "RMSE": 93612.52,
+        "R2_Score": 0.9039,
+        "Adj_R2": 0.9033,
+        "MAPE": 12.65,
+        "Model": "CatBoost"
+    }
+}
